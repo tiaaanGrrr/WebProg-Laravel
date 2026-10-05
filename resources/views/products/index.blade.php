@@ -1,37 +1,46 @@
 @extends('layouts.app')
 
+@section('title', 'Katalog Produk | Cahaya Sembahyang')
+
 @section('content')
-<div class="mb-4">
-    <h2 class="fw-bold">Katalog Alat Sembahyang</h2>
-    <p class="text-muted">Pilihan dupa, lilin, rupang, dan sarana puja berkualitas.</p>
-</div>
-
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    @forelse($products as $product)
-        <div class="col">
-            <div class="card h-100 shadow-sm border-0">
-                <img src="{{ $product->image }}" class="card-img-top" alt="{{ $product->name }}" style="height: 200px; object-fit: cover;">
-                <div class="card-body d-flex flex-column">
-                    <span class="badge bg-secondary mb-2 align-self-start">{{ $product->category }}</span>
-                    <h5 class="card-title">{{ $product->name }}</h5>
-                    <p class="card-text text-muted small flex-grow-1">{{ $product->description }}</p>
-
-                    <div class="mt-3 d-flex justify-content-between align-items-center">
-                        <span class="fs-5 fw-bold text-danger">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                        <span class="badge {{ $product->stock > 0 ? 'bg-success' : 'bg-danger' }}">
-                            Stok: {{ $product->stock }}
-                        </span>
-                    </div>
+<section class="site-container catalog-page" aria-labelledby="catalog-title" data-catalog>
+    <div class="section-heading">
+        <p class="eyebrow">Koleksi Perlengkapan</p>
+        <h1 id="catalog-title">Katalog Sembahyang</h1>
+        <p>Pilihan dupa, lilin, kertas sembahyang, dan sarana puja untuk kebutuhan Anda.</p>
+    </div>
+    <div class="catalog-controls">
+        <label class="catalog-filter" for="category-filter">Kategori
+            <select id="category-filter" data-category-filter>
+                <option value="">Semua kategori</option>
+                @foreach($products->pluck('category')->unique()->sort() as $category)
+                    <option value="{{ $category }}">{{ $category }}</option>
+                @endforeach
+            </select>
+        </label>
+        <p class="catalog-summary" data-catalog-summary aria-live="polite">{{ $products->count() }} produk tersedia</p>
+    </div>
+    <div class="product-grid" data-catalog-grid>
+        @foreach($products as $product)
+            <article class="product-card" data-product-card data-product-id="database-{{ $product->id }}" data-product-name="{{ $product->name }}" data-product-category="{{ $product->category }}" data-product-price="{{ $product->price }}" data-product-stock="{{ $product->stock }}" data-product-image="{{ $product->image }}">
+                <div class="product-card__visual">
+                    <img class="product-card__image" src="{{ $product->image }}" alt="{{ $product->name }}" loading="lazy" data-product-image-fallback>
+                    <span class="product-card__badge">{{ $product->category }}</span>
                 </div>
-                <div class="card-footer bg-white border-0 pt-0 pb-3">
-                    <button class="btn btn-warning w-100 fw-semibold text-dark">Tambah ke Keranjang</button>
+                <div class="product-card__body">
+                    <h3>{{ $product->name }}</h3>
+                    <p class="product-card__description">{{ $product->description }}</p>
+                    <p class="price"><strong>Rp {{ number_format($product->price, 0, ',', '.') }}</strong></p>
+                    <p class="stock-note">Stok: {{ $product->stock }}</p>
                 </div>
-            </div>
-        </div>
-    @empty
-        <div class="col-12 text-center py-5">
-            <p class="text-muted fs-5">Belum ada produk yang tersedia.</p>
-        </div>
-    @endforelse
-</div>
+                <button class="site-button site-button--full" type="button" data-add-to-cart @disabled($product->stock <= 0)>TAMBAH KE KERANJANG</button>
+            </article>
+        @endforeach
+    </div>
+    <div class="empty-state" data-catalog-empty @if($products->isNotEmpty()) hidden @endif>
+        <h2>Produk belum tersedia</h2>
+        <p data-empty-message>Koleksi sedang diperbarui. Silakan kunjungi kembali nanti.</p>
+        <button class="site-button site-button--outline" type="button" data-reset-filters>RESET PENCARIAN</button>
+    </div>
+</section>
 @endsection

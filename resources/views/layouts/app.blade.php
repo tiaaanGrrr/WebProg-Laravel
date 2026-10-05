@@ -2,26 +2,27 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toko Perlengkapan Sembahyang Buddha</title>
-    <!-- CDN Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Cahaya Sembahyang: pilihan hio, lilin, kertas sembahyang, dan perlengkapan ritual.">
+    <meta name="theme-color" content="#8b1e21">
+    <title>@yield('title', 'Cahaya Sembahyang | Perlengkapan Sembahyang')</title>
+    <link rel="stylesheet" href="{{ asset('css/cahaya.css') }}">
+    <script src="{{ asset('js/cahaya.js') }}" defer></script>
+    @stack('styles')
 </head>
-<body class="bg-light">
+<body data-catalog-url="{{ route('products.index') }}" data-asset-root="{{ asset('images/cahaya') }}">
+    <a class="skip-link" href="#main-content">Langsung ke konten</a>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="{{ route('products.index') }}">Dharma Shop</a>
-        </div>
-    </nav>
+    @include('partials.header')
 
-    <!-- Konten Dinamis -->
-    <main class="container">
+    <main id="main-content">
         @yield('content')
     </main>
 
-    <!-- CDN Bootstrap 5 JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @include('partials.footer')
+    @include('partials.cart')
+
+    <div class="toast" id="site-toast" role="status" aria-live="polite" hidden></div>
+    @stack('scripts')
 </body>
 </html>

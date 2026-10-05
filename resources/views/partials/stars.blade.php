@@ -1,0 +1,5 @@
+@include('partials.icon', ['name' => 'star'])
+@include('partials.icon', ['name' => 'star'])
+@include('partials.icon', ['name' => 'star'])
+@include('partials.icon', ['name' => 'star'])
+@include('partials.icon', ['name' => ($lastMuted ?? false) ? 'star-muted' : 'star'])
