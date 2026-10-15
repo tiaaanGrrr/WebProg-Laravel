@@ -1,5 +1,10 @@
 /* Token warna dan tipografi diambil dari desain WebProg di Figma. */
 .admin-page { padding-bottom: 72px; }
+.account-bar { border-top: 1px solid var(--border); background: var(--cream); }
+.account-bar__inner { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 12px 20px; padding-block: 10px; font-size: 12px; }
+.account-bar__inner > span { margin-right: auto; min-width: 0; overflow-wrap: anywhere; color: var(--muted); }
+.account-bar a, .account-link { color: var(--wine); text-decoration: underline; }
+.account-bar button { padding: 0; border: 0; color: var(--wine); background: transparent; text-decoration: underline; font: inherit; }
 .customer-order-card { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; padding: 24px; margin-block: 20px; border: 1px solid var(--border); background: var(--cream); }
 .customer-order-card > div { min-width: 0; overflow-wrap: anywhere; }
 .customer-order-card h2 { font-size: 19px; color: var(--wine); }

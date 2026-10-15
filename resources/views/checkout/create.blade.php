@@ -9,7 +9,7 @@
             @csrf
             <input type="hidden" name="checkout_token" value="{{ $token }}">
             <h2>Data Penerima</h2>
-            <label>Nama penerima<input name="customer_name" value="{{ old('customer_name') }}" autocomplete="name" maxlength="255" required></label>
+            <label>Nama penerima<input name="customer_name" value="{{ old('customer_name', auth('customer')->user()->name) }}" autocomplete="name" maxlength="255" required></label>
             <label>Nomor HP<input name="phone" type="tel" value="{{ old('phone') }}" autocomplete="tel" minlength="8" maxlength="25" required></label>
             <label>Alamat lengkap<textarea name="address" rows="4" autocomplete="street-address" minlength="10" maxlength="2000" required>{{ old('address') }}</textarea></label>
             <label>Catatan (opsional)<textarea name="notes" rows="2" maxlength="1000">{{ old('notes') }}</textarea></label>

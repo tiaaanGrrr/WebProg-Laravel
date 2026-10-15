@@ -51,7 +51,10 @@ class AdminOrderStatusTest extends TestCase
         $this->assertModelExists($item);
         $this->patch('/admin/orders/'.$order->id, $payload)->assertRedirect('/admin/orders/'.$order->id);
         $this->assertDatabaseHas('products', ['id' => $product->id, 'stock' => 10]);
-        $this->withSession(['order_references' => [$order->reference]])->get(route('checkout.success', $order->reference))->assertOk()->assertSee('Dibatalkan');
+        $buyer = User::factory()->create();
+        $order->user_id = $buyer->id;
+        $order->save();
+        $this->actingAs($buyer, 'customer')->get(route('checkout.success', $order->reference))->assertOk()->assertSee('Dibatalkan');
     }
 
     public function test_cancellation_handles_deleted_products_and_restores_remaining_products(): void

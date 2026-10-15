@@ -80,6 +80,7 @@ class CheckoutController extends Controller
                     ...$request->safe()->only(['customer_name', 'phone', 'address', 'notes']),
                     'reference' => 'CS-'.strtoupper(Str::random(10)),
                     'checkout_token' => $checkout['token'],
+                    'user_id' => $request->user('customer')->id,
                     'total' => $lines->sum(fn (array $line): int => $line['product']->price * $line['quantity']),
                 ]);
                 foreach ($lines as $line) {
@@ -105,17 +106,15 @@ class CheckoutController extends Controller
                 throw $exception;
             }
         }
+        abort_unless((int) $order->user_id === (int) $request->user('customer')->id, 404);
         $request->session()->put('checkout.reference', $order->reference);
-        $references = $request->session()->get('order_references', []);
-        $references[] = $order->reference;
-        $request->session()->put('order_references', array_slice(array_unique($references), -20));
 
         return redirect()->route('checkout.success', $order->reference)->with('purchased_items', $checkout['items']);
     }
 
     public function success(Request $request, Order $order): View
     {
-        abort_unless(in_array($order->reference, $request->session()->get('order_references', []), true), 404);
+        abort_unless((int) $order->user_id === (int) $request->user('customer')->id, 404);
 
         return view('checkout.success', ['order' => $order->load('items')]);
     }

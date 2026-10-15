@@ -21,6 +21,7 @@ class CheckoutTest extends TestCase
 
     private function startCheckout(Product $product, int $quantity = 2): string
     {
+        $this->actingAs(User::factory()->create(), 'customer');
         $this->post('/checkout/preview', ['items' => [['product_id' => $product->id, 'quantity' => $quantity, 'price' => 1]], 'total' => 1])->assertRedirect('/checkout');
 
         return session('checkout.token');
@@ -48,7 +49,7 @@ class CheckoutTest extends TestCase
     public function test_empty_duplicate_and_invalid_quantity_carts_are_rejected(): void
     {
         $product = Product::factory()->create();
-        $this->get('/checkout')->assertRedirect('/products');
+        $this->get('/checkout')->assertRedirect('/login');
         $this->post('/checkout/preview', [])->assertSessionHasErrors('items');
         $this->post('/checkout/preview', ['items' => [['product_id' => $product->id, 'quantity' => 0]]])->assertSessionHasErrors('items.0.quantity');
         $this->post('/checkout/preview', ['items' => [['product_id' => $product->id, 'quantity' => 100]]])->assertSessionHasErrors('items.0.quantity');
@@ -68,6 +69,7 @@ class CheckoutTest extends TestCase
 
     public function test_stock_change_prevents_the_entire_order(): void
     {
+        $this->actingAs(User::factory()->create(), 'customer');
         $first = Product::factory()->create(['stock' => 5]);
         $second = Product::factory()->create(['stock' => 5]);
         $this->post('/checkout/preview', ['items' => [['product_id' => $first->id, 'quantity' => 2], ['product_id' => $second->id, 'quantity' => 2]]])->assertRedirect('/checkout');
@@ -110,11 +112,14 @@ class CheckoutTest extends TestCase
         $item = OrderItem::factory()->create(['product_name' => '<script>alert(1)</script>']);
         $order = $item->order;
         Product::findOrFail($item->product_id)->delete();
-        $this->get(route('checkout.success', $order->reference))->assertNotFound();
-        $this->withSession(['order_references' => [$order->reference]])->get(route('checkout.success', $order->reference))->assertOk()->assertSee($item->product_name)->assertDontSee($item->product_name, false);
+        $this->get(route('checkout.success', $order->reference))->assertRedirect('/login');
+        $buyer = User::factory()->create();
+        $order->user_id = $buyer->id;
+        $order->save();
+        $this->actingAs($buyer, 'customer')->get(route('checkout.success', $order->reference))->assertOk()->assertSee($item->product_name)->assertDontSee($item->product_name, false);
         $this->get('/admin/orders')->assertRedirect('/admin/login');
         $user = User::factory()->create();
-        $this->actingAs($user)->get('/admin/orders/'.$order->id)->assertForbidden();
+        $this->actingAs($user, 'web')->get('/admin/orders/'.$order->id)->assertForbidden();
         $user->is_admin = true;
         $user->save();
         $this->get('/admin/orders')->assertOk()->assertSee($order->reference);

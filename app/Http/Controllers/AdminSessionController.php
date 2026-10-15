@@ -12,7 +12,7 @@ class AdminSessionController extends Controller
 {
     public function create(): View|RedirectResponse
     {
-        if (Auth::user()?->is_admin) {
+        if (Auth::guard('web')->user()?->is_admin) {
             return redirect()->route('admin.dashboard');
         }
 
@@ -22,7 +22,7 @@ class AdminSessionController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $credentials = $request->validate(['email' => ['required', 'email'], 'password' => ['required', 'string']]);
-        if (! Auth::attempt([...$credentials, 'is_admin' => true])) {
+        if (! Auth::guard('web')->attempt([...$credentials, 'is_admin' => true])) {
             throw ValidationException::withMessages(['email' => 'Email atau password admin salah.']);
         }
         $request->session()->regenerate();
@@ -32,8 +32,9 @@ class AdminSessionController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
-        Auth::logout();
-        $request->session()->invalidate();
+        Auth::guard('web')->logout();
+        $request->session()->forget('url.intended');
+        $request->session()->regenerate(true);
         $request->session()->regenerateToken();
 
         return redirect()->route('login');

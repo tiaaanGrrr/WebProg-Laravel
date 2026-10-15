@@ -3,7 +3,7 @@
 @section('content')
 <section class="site-container catalog-page admin-page">
     <div class="section-heading"><p class="eyebrow">Riwayat Belanja</p><h1>Pesanan Saya</h1><p>Lihat rincian dan status terbaru pesanan Anda.</p></div>
-    <p class="admin-notice">Riwayat sementara dari sesi browser ini, maksimal 20 pesanan terbaru. Jika sesi berakhir, daftar ini tidak tersedia; pesanan tetap tersimpan pada admin toko.</p>
+    <p class="admin-notice">Riwayat terhubung ke akun Anda dan bisa dibuka kembali setelah masuk, termasuk dari browser lain.</p>
     <p class="stock-note">Menampilkan {{ $orders->firstItem() ?? 0 }}–{{ $orders->lastItem() ?? 0 }} dari {{ $orders->total() }} pesanan.</p>
     @forelse($orders as $order)
         <article class="customer-order-card">

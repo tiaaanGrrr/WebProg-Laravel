@@ -18,6 +18,7 @@
             <button class="site-button site-button--full" type="submit" data-checkout-button disabled>LANJUT KE CHECKOUT</button>
         </form>
         <p class="cart-note">Pesanan demo untuk tugas kuliah, tanpa pembayaran.</p>
+        @guest('customer')<p class="cart-note">Masuk atau daftar sebagai pembeli untuk melanjutkan checkout. Isi keranjang tetap tersimpan.</p>@endguest
         <a class="cart-history-link" href="{{ route('orders.index') }}">Lihat Pesanan Saya</a>
         <noscript>Aktifkan JavaScript untuk menggunakan keranjang dan checkout.</noscript>
     </footer>

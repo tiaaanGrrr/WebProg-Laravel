@@ -38,4 +38,17 @@
             <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
         </button>
     </nav>
+    <nav class="account-bar" aria-label="Akun pembeli">
+        <div class="site-container account-bar__inner">
+            @auth('customer')
+                <span>Halo, {{ auth('customer')->user()->name }}</span>
+                <a href="{{ route('orders.index') }}">Pesanan Saya</a>
+                <form action="{{ route('customer.logout') }}" method="POST">@csrf<button type="submit">Keluar Pembeli</button></form>
+            @else
+                <span>Belanja lebih mudah dengan akun Anda</span>
+                <a href="{{ route('customer.login') }}">Masuk Pembeli</a>
+                <a href="{{ route('customer.register') }}">Daftar</a>
+            @endauth
+        </div>
+    </nav>
 </header>
