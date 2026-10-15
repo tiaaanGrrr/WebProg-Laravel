@@ -63,6 +63,8 @@
     <div class="footer-bottom">
         <div class="site-container footer-bottom__inner">
             <p>&copy; {{ date('Y') }} PT Cahaya Sembahyang Indonesia. Hak Cipta Dilindungi.</p>
+            <a href="{{ route('login') }}">Admin</a>
+            <a href="{{ route('orders.index') }}">Pesanan Saya</a>
             <div class="payment-methods" aria-label="Metode pembayaran pada desain">
                 <span>BCA</span><span>Mandiri</span><span>GoPay</span><span>OVO</span><span>Visa</span>
             </div>

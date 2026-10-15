@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Product;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class ProductSeeder extends Seeder
@@ -13,22 +12,23 @@ class ProductSeeder extends Seeder
      */
     public function run(): void
     {
-        Product::create([
-            'name' => 'Dupa',
-            'category' => 'Dupa & Lilin',
-            'description' => 'Dupa wangi',
-            'price' => 45000,
-            'stock' => 100,
-            'image' => 'https://via.placeholder.com/300x300.png?text=Dupa+Cendana',
-        ]);
+        $products = [
+            ['Hio Cendana Australia Premium', 'Hio & Incense', 'Dupa hio cendana untuk peribadatan harian.', 125000, 'product-hio.jpg'],
+            ['Lilin Merah Naga Ukir 24 Jam', 'Lilin Sembahyang', 'Sepasang lilin merah ukir naga untuk altar keluarga.', 185000, 'product-lilin.jpg'],
+            ['Kertas Emas Kim Cua Tebal (Isi 100)', 'Kertas Sembahyang', 'Kertas sembahyang emas tebal isi 100 lembar.', 65000, 'product-kertas.jpg'],
+            ['Minyak Lilin Alami Ramah Lingkungan', 'Minyak Sembahyang', 'Minyak pelita untuk kebutuhan sembahyang harian.', 95000, 'product-minyak.jpg'],
+            ['Paket Sembahyang Harian Lengkap', 'Paket', 'Satu paket berisi hio cendana, sepasang lilin merah, kertas sembahyang, dan minyak pelita.', 245000, 'bundle-harian.jpg'],
+            ['Paket Hari Raya Imlek Agung', 'Paket', 'Paket Imlek berisi hio cendana, lilin ukir naga jumbo, kertas Thian Gong, dan mangkuk dupa kuningan.', 580000, 'bundle-imlek.jpg'],
+        ];
 
-        Product::create([
-            'name' => 'Dupa2',
-            'category' => 'Dupa & Lilin2',
-            'description' => 'Dupa wangi2',
-            'price' => 55000,
-            'stock' => 100,
-            'image' => 'https://via.placeholder.com/300x300.png?text=Dupa+Cendana',
-        ]);
+        foreach ($products as [$name, $category, $description, $price, $image]) {
+            Product::firstOrCreate(['name' => $name], [
+                'category' => $category,
+                'description' => $description,
+                'price' => $price,
+                'stock' => 100,
+                'image' => 'images/cahaya/'.$image,
+            ]);
+        }
     }
 }

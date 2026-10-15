@@ -3,7 +3,10 @@
 @section('title', 'Cahaya Sembahyang | Warisan Tradisi Leluhur')
 
 @section('content')
-{{-- Produk, ulasan, paket, dan informasi toko di beranda masih berupa contoh dari Figma. --}}
+@if($errors->any() || session('status'))
+    <div class="site-container">@include('admin.messages')</div>
+@endif
+{{-- Produk dan paket berasal dari database; konten profil dan ulasan mengikuti desain. --}}
 <section class="hero" aria-labelledby="hero-title">
     <div class="hero__content">
         <div class="hero__copy">
@@ -73,54 +76,11 @@
             <p>Produk yang paling banyak digunakan oleh umat untuk peribadatan harian maupun hari raya.</p>
         </div>
         <div class="product-grid">
-            <article class="product-card" data-product-card data-product-id="demo-hio" data-product-name="Hio Cendana Australia Premium" data-product-price="125000" data-product-image="{{ asset('images/cahaya/product-hio.jpg') }}" data-product-category="Hio &amp; Incense">
-                <div class="product-card__visual">
-                    <img class="product-card__image" src="{{ asset('images/cahaya/product-hio.jpg') }}" alt="Hio Cendana Australia Premium" width="1024" height="1024" loading="lazy">
-                    <span class="product-card__badge">Terlaris</span>
-                </div>
-                <div class="product-card__body">
-                    <h3>Hio Cendana Australia Premium</h3>
-                    <div class="rating"><span class="rating__stars" aria-label="5 dari 5 bintang">@include('partials.stars')</span><span class="rating__count">(148 ulasan)</span></div>
-                    <p class="price"><strong>Rp 125.000</strong><del>Rp 150.000</del></p>
-                </div>
-                <button class="site-button site-button--full" type="button" data-add-to-cart>TAMBAH KE KERANJANG</button>
-            </article>
-            <article class="product-card" data-product-card data-product-id="demo-lilin" data-product-name="Lilin Merah Naga Ukir 24 Jam" data-product-price="185000" data-product-image="{{ asset('images/cahaya/product-lilin.jpg') }}" data-product-category="Lilin Sembahyang">
-                <div class="product-card__visual">
-                    <img class="product-card__image" src="{{ asset('images/cahaya/product-lilin.jpg') }}" alt="Lilin Merah Naga Ukir 24 Jam" width="1024" height="1024" loading="lazy">
-                    <span class="product-card__badge">Premium</span>
-                </div>
-                <div class="product-card__body">
-                    <h3>Lilin Merah Naga Ukir 24 Jam</h3>
-                    <div class="rating"><span class="rating__stars" aria-label="5 dari 5 bintang">@include('partials.stars')</span><span class="rating__count">(92 ulasan)</span></div>
-                    <p class="price"><strong>Rp 185.000</strong></p>
-                </div>
-                <button class="site-button site-button--full" type="button" data-add-to-cart>TAMBAH KE KERANJANG</button>
-            </article>
-            <article class="product-card" data-product-card data-product-id="demo-kertas" data-product-name="Kertas Emas Kim Cua Tebal (Isi 100)" data-product-price="65000" data-product-image="{{ asset('images/cahaya/product-kertas.jpg') }}" data-product-category="Kertas Sembahyang">
-                <div class="product-card__visual">
-                    <img class="product-card__image" src="{{ asset('images/cahaya/product-kertas.jpg') }}" alt="Kertas Emas Kim Cua Tebal (Isi 100)" width="1024" height="1024" loading="lazy">
-                    <span class="product-card__badge">Hemat</span>
-                </div>
-                <div class="product-card__body">
-                    <h3>Kertas Emas Kim Cua Tebal (Isi 100)</h3>
-                    <div class="rating"><span class="rating__stars" aria-label="4 dari 5 bintang">@include('partials.stars', ['lastMuted' => true])</span><span class="rating__count">(210 ulasan)</span></div>
-                    <p class="price"><strong>Rp 65.000</strong><del>Rp 75.000</del></p>
-                </div>
-                <button class="site-button site-button--full" type="button" data-add-to-cart>TAMBAH KE KERANJANG</button>
-            </article>
-            <article class="product-card" data-product-card data-product-id="demo-minyak" data-product-name="Minyak Lilin Alami Ramah Lingkungan" data-product-price="95000" data-product-image="{{ asset('images/cahaya/product-minyak.jpg') }}" data-product-category="Minyak Sembahyang">
-                <div class="product-card__visual">
-                    <img class="product-card__image" src="{{ asset('images/cahaya/product-minyak.jpg') }}" alt="Minyak Lilin Alami Ramah Lingkungan" width="1024" height="1024" loading="lazy">
-                    <span class="product-card__badge">Baru</span>
-                </div>
-                <div class="product-card__body">
-                    <h3>Minyak Lilin Alami Ramah Lingkungan</h3>
-                    <div class="rating"><span class="rating__stars" aria-label="5 dari 5 bintang">@include('partials.stars')</span><span class="rating__count">(56 ulasan)</span></div>
-                    <p class="price"><strong>Rp 95.000</strong></p>
-                </div>
-                <button class="site-button site-button--full" type="button" data-add-to-cart>TAMBAH KE KERANJANG</button>
-            </article>
+            @forelse($products as $product)
+                @include('partials.product-card', ['product' => $product])
+            @empty
+                <p>Koleksi sedang diperbarui. Silakan kunjungi kembali nanti.</p>
+            @endforelse
         </div>
     </div>
 </section>
@@ -147,32 +107,18 @@
             <p>Rekomendasi paket praktis yang disusun secara sistematis untuk berbagai keperluan ibadah harian maupun bulanan.</p>
         </div>
         <div class="bundle-grid">
-            <article class="bundle-card" data-product-card data-product-id="demo-bundle-harian" data-product-name="Paket Sembahyang Harian Lengkap" data-product-price="245000" data-product-image="{{ asset('images/cahaya/bundle-harian.jpg') }}">
-                <img class="bundle-card__image" src="{{ asset('images/cahaya/bundle-harian.jpg') }}" alt="Paket lengkap perlengkapan sembahyang harian" width="848" height="1264" loading="lazy">
-                <div class="bundle-card__body">
-                    <div><h3>Paket Sembahyang Harian Lengkap</h3><p>Satu paket lengkap berisi 1 dus Hio Cendana Wangi, 1 pasang Lilin Merah 8 Jam, 1 pack Kertas Sembahyang, dan 1 botol minyak doa harian.</p></div>
-                    <ul class="bundle-card__list">
-                        <li>@include('partials.icon', ['name' => 'check']) 1x Dupa Hio Cendana Australia</li>
-                        <li>@include('partials.icon', ['name' => 'check']) 2x Lilin Ulir Merah 8 Jam</li>
-                        <li>@include('partials.icon', ['name' => 'check']) 1x Pack Joss Paper Premium</li>
-                        <li>@include('partials.icon', ['name' => 'check']) Minyak Pelita Murni</li>
-                    </ul>
-                    <div class="bundle-card__bottom"><p class="price"><strong>Rp 245.000</strong><del>Rp 295.000</del></p><button class="site-button" type="button" data-add-to-cart data-buy-now>BELI SEKARANG</button></div>
-                </div>
-            </article>
-            <article class="bundle-card" data-product-card data-product-id="demo-bundle-imlek" data-product-name="Paket Hari Raya Imlek Agung" data-product-price="580000" data-product-image="{{ asset('images/cahaya/bundle-imlek.jpg') }}">
-                <img class="bundle-card__image" src="{{ asset('images/cahaya/bundle-imlek.jpg') }}" alt="Paket perlengkapan sembahyang Imlek" width="848" height="1264" loading="lazy">
-                <div class="bundle-card__body">
-                    <div><h3>Paket Hari Raya Imlek Agung</h3><p>Khusus dipersiapkan untuk hari raya besar Imlek. Lilin Naga Premium jumbo, Hio Cendana wangi awet 24 Jam, dan kertas doa persembahan khusus Thian Gong.</p></div>
-                    <ul class="bundle-card__list">
-                        <li>@include('partials.icon', ['name' => 'check']) 1x Hio Cendana Wangi 24 Jam</li>
-                        <li>@include('partials.icon', ['name' => 'check']) 2x Lilin Ukir Naga Merah Jumbo</li>
-                        <li>@include('partials.icon', ['name' => 'check']) 3x Pack Kertas Thian Gong Kim</li>
-                        <li>@include('partials.icon', ['name' => 'check']) Mangkuk Dupa Kuningan Tebal</li>
-                    </ul>
-                    <div class="bundle-card__bottom"><p class="price"><strong>Rp 580.000</strong><del>Rp 690.000</del></p><button class="site-button" type="button" data-add-to-cart data-buy-now>BELI SEKARANG</button></div>
-                </div>
-            </article>
+            @forelse($bundles as $product)
+                <article class="bundle-card" data-product-card data-product-id="database-{{ $product->id }}" data-product-name="{{ $product->name }}" data-product-price="{{ $product->price }}" data-product-stock="{{ $product->stock }}" data-product-image="{{ $product->image_url }}">
+                    <a class="bundle-card__visual-link" href="{{ route('products.show', $product) }}" aria-label="Lihat detail {{ $product->name }}"><img class="bundle-card__image" src="{{ $product->image_url }}" alt="{{ $product->name }}" width="848" height="1264" loading="lazy" data-product-image-fallback></a>
+                    <div class="bundle-card__body">
+                        <div><h3><a href="{{ route('products.show', $product) }}">{{ $product->name }}</a></h3><p>{{ $product->description }}</p></div>
+                        <p class="stock-note">Stok: {{ $product->stock }}</p>
+                        <div class="bundle-card__bottom"><p class="price"><strong>Rp {{ number_format($product->price, 0, ',', '.') }}</strong></p><button class="site-button" type="button" data-add-to-cart data-buy-now>BELI SEKARANG</button></div>
+                    </div>
+                </article>
+            @empty
+                <p>Paket sedang diperbarui. Silakan lihat koleksi lainnya.</p>
+            @endforelse
         </div>
     </div>
 </section>

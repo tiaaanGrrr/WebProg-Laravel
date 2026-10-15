@@ -1,6 +1,23 @@
-/* Interaksi UI saja. Harga/stok di browser tidak boleh dipercaya saat checkout nyata. */
+/* Keranjang di browser; harga dan stok checkout diperiksa oleh Laravel. */
 (() => {
     'use strict';
+
+    document.querySelectorAll('[data-print-order]').forEach((button) => {
+        button.addEventListener('click', () => window.print());
+    });
+
+    document.querySelector('[data-order-status-form]')?.addEventListener('submit', (event) => {
+        const status = event.currentTarget.querySelector('[name="status"]').value;
+        if (status === 'dibatalkan' && !window.confirm('Batalkan pesanan ini dan kembalikan stok? Tindakan ini tidak bisa dibatalkan.')) {
+            event.preventDefault();
+        }
+    });
+
+    document.querySelectorAll('[data-confirm-delete]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            if (!window.confirm('Hapus produk ini? Produk tidak akan tampil lagi di toko.')) event.preventDefault();
+        });
+    });
 
     const storageKey = 'cahaya-sembahyang-cart-v1';
     const rupiah = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
@@ -59,6 +76,56 @@
 
     let cart = readCart();
 
+    const receipt = document.querySelector('[data-purchased-items]');
+    if (receipt) {
+        const marker = `cahaya-order-${receipt.dataset.orderReference}`;
+        try {
+            const purchased = JSON.parse(receipt.dataset.purchasedItems || '[]');
+            if (purchased.length && !sessionStorage.getItem(marker)) {
+                cart = cart.map((item) => {
+                    const line = purchased.find((entry) => item.id === `database-${entry.product_id}`);
+                    return line ? { ...item, quantity: item.quantity - line.quantity } : item;
+                }).filter((item) => item.quantity > 0);
+                saveCart();
+                sessionStorage.setItem(marker, '1');
+            }
+        } catch { /* Pesanan tersimpan meskipun storage browser tidak tersedia. */ }
+    }
+
+    const checkoutCart = document.querySelector('[data-checkout-cart]');
+    checkoutCart?.addEventListener('submit', (event) => {
+        const inputs = checkoutCart.querySelector('[data-checkout-inputs]');
+        inputs.replaceChildren();
+        if (!cart.length || cart.some((item) => !/^database-[1-9][0-9]*$/.test(item.id))) {
+            event.preventDefault();
+            notify('Hapus produk demo lama dan tambahkan produk dari katalog sebelum checkout.');
+            return;
+        }
+        cart.forEach((item, index) => {
+            for (const [key, value] of [['product_id', item.id.slice(9)], ['quantity', item.quantity]]) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = `items[${index}][${key}]`;
+                input.value = value;
+                inputs.append(input);
+            }
+        });
+    });
+
+    const orderForm = document.querySelector('[data-order-form]');
+    orderForm?.addEventListener('submit', () => {
+        const button = orderForm.querySelector('[type="submit"]');
+        button.disabled = true;
+        button.textContent = 'MENYIMPAN PESANAN...';
+    });
+    window.addEventListener('pageshow', () => {
+        const button = orderForm?.querySelector('[type="submit"]');
+        if (button) {
+            button.disabled = false;
+            button.textContent = 'KONFIRMASI PESANAN DEMO';
+        }
+    });
+
     function saveCart() {
         try { localStorage.setItem(storageKey, JSON.stringify(cart)); }
         catch { storageAvailable = false; }
@@ -75,6 +142,7 @@
     function renderCart() {
         const count = cart.reduce((sum, item) => sum + item.quantity, 0);
         document.querySelectorAll('[data-cart-count]').forEach((node) => { node.textContent = count; });
+        document.querySelectorAll('[data-checkout-button]').forEach((button) => { button.disabled = cart.length === 0; });
         document.querySelectorAll('[data-open-cart]').forEach((node) => { node.setAttribute('aria-label', `Buka keranjang, ${count} barang`); });
         if (!cartItems) return;
         cartItems.replaceChildren();
@@ -133,20 +201,29 @@
             return;
         }
         const maxQuantity = Math.min(99, Math.floor(stock));
+        const quantityInput = card.querySelector('[data-product-quantity]');
+        const quantity = Number(quantityInput?.value ?? 1);
+        if (!Number.isInteger(quantity) || quantity < 1 || quantity > maxQuantity) {
+            quantityInput?.reportValidity();
+            notify(`Pilih jumlah antara 1 dan ${maxQuantity}.`);
+            return;
+        }
         const existing = cart.find((item) => item.id === card.dataset.productId);
+        if ((existing?.quantity ?? 0) + quantity > maxQuantity) {
+            notify(`Sisa yang bisa ditambahkan ke keranjang: ${Math.max(0, maxQuantity - (existing?.quantity ?? 0))} unit.`);
+            return;
+        }
         if (existing) {
             existing.maxQuantity = maxQuantity;
             existing.price = price;
-            if (existing.quantity >= maxQuantity) {
-                notify('Jumlah sudah mencapai batas stok untuk demo ini.');
-                return;
-            }
-            existing.quantity += 1;
+            existing.name = card.dataset.productName;
+            existing.image = imageUrl(card.dataset.productImage);
+            existing.quantity += quantity;
         } else {
-            cart.push({ id: card.dataset.productId, name: card.dataset.productName, price, image: imageUrl(card.dataset.productImage), quantity: 1, maxQuantity });
+            cart.push({ id: card.dataset.productId, name: card.dataset.productName, price, image: imageUrl(card.dataset.productImage), quantity, maxQuantity });
         }
         saveCart();
-        notify(storageAvailable ? 'Produk ditambahkan ke keranjang demo.' : 'Produk ditambahkan. Browser ini tidak menyimpan keranjang setelah halaman ditutup.');
+        notify(storageAvailable ? 'Produk ditambahkan ke keranjang.' : 'Produk ditambahkan. Browser ini tidak menyimpan keranjang setelah halaman ditutup.');
         if (button.hasAttribute('data-buy-now')) openCart();
     }
 
